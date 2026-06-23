@@ -1,7 +1,11 @@
 # NASM is required to build AOM
-vcpkg_find_acquire_program(NASM)
+# vcpkg's NASM 3.x is incompatible with aom, use system NASM 2.x
+set(NASM "$ENV{USERPROFILE}/.local/nasm/nasm-2.16.03/nasm.exe" CACHE FILEPATH "System NASM")
+if(NOT EXISTS "${NASM}")
+    message(FATAL_ERROR "System NASM 2.x not found at ${NASM}")
+endif()
 get_filename_component(NASM_EXE_PATH ${NASM} DIRECTORY)
-vcpkg_add_to_path(${NASM_EXE_PATH})
+vcpkg_add_to_path(PREPEND ${NASM_EXE_PATH})
 
 # Perl is required to build AOM
 vcpkg_find_acquire_program(PERL)
@@ -46,6 +50,7 @@ vcpkg_cmake_configure(
     SOURCE_PATH ${SOURCE_PATH}
     OPTIONS
         ${aom_target_cpu}
+        -DCMAKE_ASM_NASM_COMPILER=${NASM}
         -DENABLE_DOCS=OFF
         -DENABLE_EXAMPLES=OFF
         -DENABLE_TESTDATA=OFF

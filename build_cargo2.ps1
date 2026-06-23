@@ -1,0 +1,10 @@
+$cmakeDir = "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
+$ninjaDir = "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"
+$env:PATH = "$cmakeDir;$ninjaDir;$env:USERPROFILE\.cargo\bin;$env:USERPROFILE\.local\nasm\nasm-2.16.03;$env:PATH"
+$env:VCPKG_ROOT = "d:\user\mr\github\utils\rustdesk"
+$env:VCPKG_INSTALLED_ROOT = "d:\user\mr\github\utils\rustdesk\vcpkg_installed"
+$env:LIBCLANG_PATH = "$env:USERPROFILE\.local\libclang\clang\native"
+$env:HTTP_PROXY = "http://10.33.250.177:8888"
+$env:HTTPS_PROXY = "http://10.33.250.177:8888"
+Set-Location "d:\user\mr\github\utils\rustdesk"
+cargo build --lib --features flutter --release 2>&1 | Out-File -FilePath "d:\user\mr\github\utils\rustdesk\build_output.txt" -Encoding utf8
