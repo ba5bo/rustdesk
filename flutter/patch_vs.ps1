@@ -1,39 +1,17 @@
 $file = "C:\Users\mr\flutter\packages\flutter_tools\lib\src\windows\visual_studio.dart"
-$lines = [System.Collections.ArrayList][IO.File]::ReadAllLines($file)
-Write-Output "Total lines: $($lines.Count)"
+$content = [IO.File]::ReadAllText($file)
 
-# --- Fix 1: Add v18 mapping to cmakeGenerator ---
-$fix1 = $false
-for ($i = 0; $i -lt $lines.Count; $i++) {
-    if ($lines[$i] -match "^\s+17 => 'Visual Studio 17 2022',$" -and ($i+1) -lt $lines.Count -and $lines[$i+1] -match "^\s+_ => 'Visual Studio 16 2019',$") {
-        $m = [regex]::Match($lines[$i], "^(\s+)")
-        $indent = $m.Groups[1].Value
-        $newLine = $indent + "18 => 'Visual Studio 17 2022',"
-        $lines.Insert($i+1, $newLine)
-        Write-Output "Fix 1 applied: inserted '$newLine'"
-        $fix1 = $true
-        break
-    }
-}
-if (-not $fix1) {
-    Write-Output "Fix 1: already applied or pattern not found"
-}
+# Fix 1: cmakeGenerator - add VS 2026 (v18) support  
+# Match: "      17 => 'Visual Studio 17 2022',\n      _  => 'Visual Studio 16 2019',"
+$pattern1 = "(?s)(17 => 'Visual Studio 17 2022',\r?\n\s+_  => 'Visual Studio 16 2019',)"
+$replacement1 = "17 => 'Visual Studio 17 2022',`r`n      18 => 'Visual Studio 18 2026',`r`n      _  => 'Visual Studio 16 2019',"
+$content = [regex]::Replace($content, $pattern1, $replacement1)
 
-# --- Fix 2: Limit vswhere version range to [16,18) ---
-$fix2 = $false
-for ($i = 0; $i -lt $lines.Count; $i++) {
-    if ($lines[$i] -match "^\s+_minimumSupportedVersion\.toString\(\),$") {
-        $m = [regex]::Match($lines[$i], "^(\s+)")
-        $indent = $m.Groups[1].Value
-        $lines[$i] = "$indent'[16,18)',"
-        Write-Output "Fix 2 applied: vswhere version range [16,18)"
-        $fix2 = $true
-        break
-    }
-}
-if (-not $fix2) {
-    Write-Output "Fix 2: already applied or pattern not found"
-}
+# Fix 2: version range [16,18) to skip VS 2026
+# Match: "      _vswhereMinVersionArgument,\n      _minimumSupportedVersion.toString(),"
+$pattern2 = "(?s)(_vswhereMinVersionArgument,\r?\n\s+)_minimumSupportedVersion\.toString\(\),"
+$replacement2 = "`${1}'[16,18)',"
+$content = [regex]::Replace($content, $pattern2, $replacement2)
 
-[IO.File]::WriteAllLines($file, $lines.ToArray())
-Write-Output "Patch complete. Total lines: $($lines.Count)"
+[IO.File]::WriteAllText($file, $content)
+Write-Host "Patches applied successfully"

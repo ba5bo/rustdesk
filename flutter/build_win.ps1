@@ -1,3 +1,4 @@
+$env:PATH = "$env:USERPROFILE\flutter\bin;$env:PATH"
 $env:FLUTTER_STORAGE_BASE_URL = "https://storage.flutter-io.cn"
 $env:PUB_HOSTED_URL = "https://pub.dartlang.org"
 Remove-Item Env:\HTTP_PROXY -ErrorAction SilentlyContinue
