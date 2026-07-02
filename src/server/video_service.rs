@@ -593,24 +593,8 @@ fn run(vs: VideoService) -> ResultType<()> {
     ) {
         Ok(result) => result,
         Err(err) => {
-            log::error!("Failed to create encoder: {err:?}, fallback to VP9");
-            Encoder::set_fallback(&EncoderCfg::VPX(VpxEncoderConfig {
-                width: c.width as _,
-                height: c.height as _,
-                quality,
-                codec: VpxVideoCodecId::VP9,
-                keyframe_interval: None,
-            }));
-            setup_encoder(
-                &c,
-                sp.name(),
-                quality,
-                client_record,
-                record_incoming,
-                last_portable_service_running,
-                vs.source,
-                display_idx,
-            )?
+            log::error!("Failed to create encoder: {err:?}");
+            return Err(err);
         }
     };
     #[cfg(feature = "vram")]
@@ -1000,13 +984,19 @@ fn get_encoder_config(
                     keyframe_interval,
                 });
             }
-            EncoderCfg::VPX(VpxEncoderConfig {
-                width: c.width as _,
-                height: c.height as _,
+            let hw_name = if negotiated_codec == CodecFormat::H264 {
+                "h264_placeholder"
+            } else {
+                "hevc_placeholder"
+            };
+            return EncoderCfg::HWRAM(HwRamEncoderConfig {
+                name: hw_name.to_string(),
+                mc_name: None,
+                width: c.width,
+                height: c.height,
                 quality,
-                codec: VpxVideoCodecId::VP9,
                 keyframe_interval,
-            })
+            });
         }
         format @ (CodecFormat::VP8 | CodecFormat::VP9) => EncoderCfg::VPX(VpxEncoderConfig {
             width: c.width as _,

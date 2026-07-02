@@ -7,4 +7,4 @@ $env:LIBCLANG_PATH = "$env:USERPROFILE\.local\libclang\clang\native"
 $env:HTTP_PROXY = "http://10.33.250.177:8888"
 $env:HTTPS_PROXY = "http://10.33.250.177:8888"
 Set-Location "d:\user\mr\github\utils\rustdesk"
-cargo build --lib --features flutter --release 2>&1
+cargo build --lib --features "flutter,hwcodec" --release 2>&1
